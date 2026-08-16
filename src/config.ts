@@ -37,18 +37,24 @@ export const CONFIG = {
   instantFailOnHit: false, // config flag: true = one bump ends the run
 
   // --- Camera (chase pose behind + above the player) ---
-  camBack: 5.4, // distance behind the player
-  camHeight: 3.1,
-  camLookY: 0.35,
-  camLookAhead: 8, // how far down the escalator the camera aims
+  camBack: 6.4, // distance behind the player
+  camHeight: 3.7,
+  camLookY: 0.7,
+  camLookAhead: 9, // how far down the escalator the camera aims
   fovBase: 60,
   fovKick: 12, // extra FOV at full speed
 
-  // --- Render ---
+  // --- Render / art sliders (tune the THPS2 <-> cel look) ---
   fogNear: 10,
   fogFar: 36,
   maxPixelRatio: 1.5,
   ditherEnabled: true,
+  ps2Snap: true, // quantize vertices in clip space = PS2 geometry jitter
+  snapGrid: 220, // higher = subtler snap
+  toonSteps: 4, // cel bands (5-6 soft/vertex-lit .. 2-3 hard cel)
+
+  // --- Content ---
+  cleanMode: true, // true = family-friendly barks; false = full Finnish spice
 } as const;
 
 export const COLORS = {

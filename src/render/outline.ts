@@ -60,7 +60,7 @@ export function addOutline(root: Object3D, thickness = 0.02): void {
   const meshes: Mesh[] = [];
   root.traverse((o) => {
     const m = o as Mesh;
-    if (m.isMesh && !m.userData.isOutline) meshes.push(m);
+    if (m.isMesh && !m.userData.isOutline && !m.userData.noOutline) meshes.push(m);
   });
   for (const mesh of meshes) {
     const shell = new Mesh(

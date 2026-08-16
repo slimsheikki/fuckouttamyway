@@ -64,11 +64,12 @@ export class Game {
     this.scene.fog = new Fog(COLORS.fog, CONFIG.fogNear, CONFIG.fogFar);
     this.scene.background = new Color(COLORS.sky);
 
-    const hemi = new HemisphereLight(0xcfe0ff, COLORS.ground, 2.4);
-    const dir = new DirectionalLight(0xfff2d6, 2.2);
+    const hemi = new HemisphereLight(0xd6e4ff, COLORS.ground, 2.7);
+    const dir = new DirectionalLight(0xfff2d6, 2.3);
     dir.position.set(-3, 6, 4);
-    const fill = new DirectionalLight(0x8fb0ff, 0.8); // cool back-fill
-    fill.position.set(2, 4, -6);
+    // Warm back-fill from down the escalator so the away-facing commuters read.
+    const fill = new DirectionalLight(0xccd6ff, 1.6);
+    fill.position.set(1, 3, -8);
     this.envGroup.add(hemi, dir, fill);
 
     this.post = new Post(this.renderer, this.scene, this.camera, CONFIG.ditherEnabled);

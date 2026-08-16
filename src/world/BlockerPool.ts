@@ -1,6 +1,6 @@
 import type { Object3D } from "three";
-import { CONFIG, COLORS } from "../config.js";
-import { Blocker } from "./Blocker.js";
+import { CONFIG } from "../config.js";
+import { Blocker, ARCHETYPES } from "./Blocker.js";
 import { Lane, otherLane } from "./Lanes.js";
 
 // Spawns and recycles a fixed pool of blockers. Guarantees every run stays
@@ -18,9 +18,11 @@ export class BlockerPool {
     parent: Object3D,
     private readonly rng: () => number,
   ) {
+    // Each pooled blocker gets a fixed archetype (built once) so the crowd has
+    // variety without rebuilding meshes on spawn. Shuffle so runs differ.
     for (let i = 0; i < CONFIG.blockerPool; i++) {
-      const color = COLORS.standers[i % COLORS.standers.length];
-      this.pool.push(new Blocker(parent, color, this.rng() * 10));
+      const a = (i + Math.floor(this.rng() * ARCHETYPES.length)) % ARCHETYPES.length;
+      this.pool.push(new Blocker(parent, a));
     }
   }
 

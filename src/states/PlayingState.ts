@@ -110,7 +110,7 @@ export class PlayingState implements GameState {
 
   render(dt: number, _alpha: number): void {
     const g = this.game;
-    g.player.render(dt);
+    g.player.render(dt, g.director.progress);
     g.blockers.render(dt);
     g.hud.tick(dt);
 

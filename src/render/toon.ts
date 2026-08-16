@@ -10,12 +10,29 @@ import {
   Mesh,
   MeshStandardMaterial,
 } from "three";
+import { CONFIG } from "../config.js";
 
 // Shared cel-shading ramp: a few hard steps instead of a smooth gradient.
 // This is the core "toon" tell. NearestFilter keeps the bands crisp.
 let sharedRamp: DataTexture | null = null;
 
-export function toonRamp(steps = 4): DataTexture {
+/** PS2 vertex snapping: quantize the projected position to a low grid so
+ *  geometry jitters like sub-pixel-less PS2 hardware. Subtle by default. */
+export function ps2Snap(mat: MeshToonMaterial): void {
+  if (!CONFIG.ps2Snap) return;
+  mat.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader.replace(
+      "#include <project_vertex>",
+      `#include <project_vertex>
+       {
+         float g = ${CONFIG.snapGrid.toFixed(1)};
+         gl_Position.xy = floor(gl_Position.xy / gl_Position.w * g) / g * gl_Position.w;
+       }`,
+    );
+  };
+}
+
+export function toonRamp(steps = CONFIG.toonSteps): DataTexture {
   if (sharedRamp) return sharedRamp;
   const data = new Uint8Array(steps);
   for (let i = 0; i < steps; i++) {
@@ -47,11 +64,13 @@ export interface ToonOpts {
 
 export function toonMaterial(opts: ToonOpts = {}): MeshToonMaterial {
   const map = opts.map ? ps2ify(opts.map) : null;
-  return new MeshToonMaterial({
+  const mat = new MeshToonMaterial({
     color: opts.color ?? 0xffffff,
     map,
     gradientMap: toonRamp(),
   });
+  ps2Snap(mat);
+  return mat;
 }
 
 /**
