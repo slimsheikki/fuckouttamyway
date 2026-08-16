@@ -1,28 +1,29 @@
 name: Deploy to GitHub Pages
 
-# Builds the static game and publishes dist/ to Pages. Deploys a rolling PREVIEW
-# on every push to the working branch so the team can test each build on mobile +
-# desktop before it's merged; also deploys from main.
+# Builds the static game and publishes dist/ to the `gh-pages` branch on every
+# push to the working branch (and main). Publishing to a branch (rather than the
+# "GitHub Actions" Pages environment) lets us deploy a rolling PREVIEW from the
+# feature branch before merge — the github-pages environment blocks non-default
+# branches.
 #
-# One-time setup: repo Settings -> Pages -> Build and deployment -> Source:
-# "GitHub Actions". The configure-pages step below tries to enable this
-# automatically (enablement: true); if org policy blocks that, do it manually once.
+# One-time setup: repo Settings -> Pages -> Build and deployment ->
+# Source: "Deploy from a branch" -> Branch: "gh-pages" / "/ (root)".
+# After that, every push redeploys automatically to
+# https://slimsheikki.github.io/fuckouttamyway/
 on:
   push:
     branches: [main, claude/f-outta-my-way-game-gr30fx]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
+  group: pages-deploy
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,22 +31,16 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - name: Configure Pages (best-effort auto-enable)
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - run: npm ci
       - run: npm run build
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - id: deploy
-        uses: actions/deploy-pages@v4
+      - name: Publish dist/ to gh-pages
+        run: |
+          touch dist/.nojekyll
+          cd dist
+          git init -q
+          git add -A
+          git -c user.name="github-actions" -c user.email="actions@github.com" commit -qm "deploy ${GITHUB_SHA}"
+          git branch -M gh-pages
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
